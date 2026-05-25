@@ -639,23 +639,8 @@ int run() {
                     break;
                 }
                 dirty = true;
-            } else if (seq == "\r" || seq == "\n") {
-                // ENTER — apply / select
-                switch (state.selected_section()) {
-                case Section::NoiseControl:
-                    apply_noise_row(client, state, 0);
-                    break;
-                case Section::Settings:
-                    apply_settings_row(client, state, 0);
-                    break;
-                case Section::Battery:
-                    break;
-                }
-                dirty = true;
-            }
-
             // Reserved single-letter shortcuts ---------------------------
-            else if (seq == "r" || seq == "R") {
+            } else if (seq == "r" || seq == "R") {
                 state.log("rename: TODO — implement R when ready");
                 dirty = true;
             } else if (seq == "i" || seq == "I") {

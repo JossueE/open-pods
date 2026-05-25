@@ -874,7 +874,6 @@ std::vector<std::string> render_footer(std::size_t inner_width) {
         + pair("tab", "section") + "    "
         + pair("\xE2\x86\x91\xE2\x86\x93", "navigate") + "    "
         + pair("\xE2\x86\x90\xE2\x86\x92", "adjust") + "    "
-        + pair("enter", "select") + "    "
         + pair("r", "rename") + "    "
         + pair("i", "info");
     rows.push_back(box_row(line, inner_width, false));
