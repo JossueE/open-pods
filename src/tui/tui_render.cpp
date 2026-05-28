@@ -37,7 +37,8 @@ constexpr const char* CURSOR = "\xE2\x9D\xAF";    // ❯
 // Goal: the chrome (borders, titles, labels, values) is white. Color is
 // reserved for *state* indicators only — battery level, connection, ear
 // detection, runtime warnings.
-constexpr const char* RESET = "\x1b[0m";
+constexpr const char* BLACK_BG = "\x1b[40m";
+constexpr const char* RESET = "\x1b[0m\x1b[40m";
 constexpr const char* BOLD = "\x1b[1m";
 constexpr const char* WHITE = "\x1b[97m";          // bright white (focused chrome)
 constexpr const char* MUTED = "\x1b[38;5;245m";    // light gray (inactive labels)
@@ -914,7 +915,7 @@ std::vector<std::string> render_footer(
 // ───────────────────── Composer / fallbacks ─────────────────────
 
 std::string move_cursor_home() { return "\x1b[H"; }
-std::string clear_screen() { return "\x1b[2J"; }
+std::string clear_screen() { return std::string{BLACK_BG} + "\x1b[2J"; }
 
 std::string too_small_screen(uint16_t cols, uint16_t rows) {
     std::ostringstream out;
@@ -1036,7 +1037,7 @@ std::string render_frame(
     all = stack(std::move(all), std::move(footer));
 
     std::ostringstream frame;
-    frame << move_cursor_home();
+    frame << BLACK_BG << move_cursor_home();
     frame << "\x1b[J"; // clear from cursor down
     for (std::size_t i = 0; i < all.size() && i < size.rows; ++i) {
         frame << all[i] << "\r\n";

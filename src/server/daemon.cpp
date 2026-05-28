@@ -23,6 +23,8 @@
 
 namespace {
 
+constexpr auto BATTERY_REFRESH_INTERVAL = std::chrono::minutes{2};
+
 std::string component_label(BatteryComponent component) {
     switch (component) {
         case BatteryComponent::LeftBud: return "Left";
@@ -344,6 +346,7 @@ void Daemon::publish_battery_alerts(
 
 void Daemon::bluetooth_runtime_loop() {
     BluezDiscoveryBackend backend;
+    auto last_battery_refresh = std::chrono::steady_clock::now();
 
     while (bluetooth_running_) {
         std::set<std::string> connected_airpods;
@@ -397,6 +400,26 @@ void Daemon::bluetooth_runtime_loop() {
         for (const auto& mac : disconnected) {
             remove_device(mac);
             handle_event(AppEvent::device_disconnected(mac));
+        }
+
+        const auto now = std::chrono::steady_clock::now();
+        if (now - last_battery_refresh >= BATTERY_REFRESH_INTERVAL) {
+            last_battery_refresh = now;
+
+            std::vector<std::shared_ptr<AACPManager>> managers;
+            {
+                std::lock_guard lock{managers_mutex_};
+                managers.reserve(device_managers_.size());
+                for (const auto& [_, device_managers] : device_managers_) {
+                    if (auto manager = device_managers.get_aacp()) {
+                        managers.push_back(std::move(manager));
+                    }
+                }
+            }
+
+            for (const auto& manager : managers) {
+                manager->send_notification_request();
+            }
         }
 
         for (int i = 0; i < 20 && bluetooth_running_; ++i) {

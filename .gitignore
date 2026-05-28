@@ -6,6 +6,7 @@
 build/
 _CPack_Packages/
 *.deb
+*.shell-extension.zip
 CPackConfig.cmake
 CPackSourceConfig.cmake
 install_manifest.txt

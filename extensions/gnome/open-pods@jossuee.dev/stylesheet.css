@@ -1,0 +1,170 @@
+/* open-pods — Liquid Glass inspired UI.
+ * Clean grayscale palette, soft translucency, rounded corners,
+ * gentle highlights and elegant typography. */
+
+/* ---- Panel button ---- */
+.open-pods-panel-label {
+  spacing: 6px;
+  padding: 0 6px;
+}
+
+.open-pods-panel-icon {
+  icon-size: 16px;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.open-pods-panel-text {
+  font-family: "SF Pro Display", "Inter", "Cantarell", sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  font-feature-settings: "tnum";
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.open-pods-panel-label.disconnected .open-pods-panel-icon,
+.open-pods-panel-label.disconnected .open-pods-panel-text {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+/* ---- Glass menu surface ---- */
+.open-pods-glass.popup-menu-content {
+  background-gradient-direction: vertical;
+  background-gradient-start: rgba(44, 44, 46, 0.78);
+  background-gradient-end: rgba(28, 28, 30, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 5px;
+  box-shadow: 0 3px 3px 0 rgba(0, 0, 0, 0.12);
+  padding: 6px;
+}
+
+.open-pods-card-item {
+  padding: 0;
+  margin: 0;
+  border-radius: 16px;
+}
+
+.open-pods-card-item:hover,
+.open-pods-card-item:focus {
+  background-color: transparent;
+}
+
+.open-pods-card {
+  spacing: 14px;
+  padding: 12px 14px;
+  min-width: 280px;
+}
+
+/* ---- Header ---- */
+.open-pods-header {
+  spacing: 12px;
+}
+
+.open-pods-header-icon {
+  icon-size: 26px;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.open-pods-header-text {
+  spacing: 1px;
+}
+
+.open-pods-header-name {
+  font-family: "SF Pro Display", "Inter", "Cantarell", sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.96);
+}
+
+.open-pods-header-status {
+  font-family: "SF Pro Text", "Inter", "Cantarell", sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.4px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* ---- Battery meters ---- */
+.open-pods-batteries {
+  spacing: 9px;
+  padding: 2px 0;
+}
+
+.open-pods-batt-row {
+  spacing: 12px;
+}
+
+.open-pods-batt-name {
+  font-family: "SF Pro Text", "Inter", "Cantarell", sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.68);
+  min-width: 44px;
+}
+
+.open-pods-track {
+  width: 132px;
+  height: 8px;
+  border-radius: 6px;
+  background-color: rgba(255, 255, 255, 0.12);
+}
+
+.open-pods-fill {
+  height: 8px;
+  border-radius: 6px;
+  background-gradient-direction: horizontal;
+  background-gradient-start: rgba(255, 255, 255, 0.72);
+  background-gradient-end: rgba(255, 255, 255, 0.96);
+}
+
+.open-pods-fill.low {
+  background-gradient-start: rgba(255, 255, 255, 0.32);
+  background-gradient-end: rgba(255, 255, 255, 0.5);
+}
+
+.open-pods-batt-pct {
+  font-family: "SF Pro Text", "Inter", "Cantarell", sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  font-feature-settings: "tnum";
+  color: rgba(255, 255, 255, 0.92);
+  text-align: right;
+  min-width: 38px;
+}
+
+/* ---- Empty state ---- */
+.open-pods-empty {
+  font-family: "SF Pro Text", "Inter", "Cantarell", sans-serif;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.5);
+  padding: 6px 0 10px 0;
+}
+
+/* ---- Action pills ---- */
+.open-pods-actions {
+  spacing: 10px;
+  padding: 2px 0 0 0;
+}
+
+.open-pods-btn {
+  font-family: "SF Pro Text", "Inter", "Cantarell", sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.95);
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 13px;
+  padding: 9px 12px;
+}
+
+.open-pods-btn:hover {
+  background-color: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+.open-pods-btn:active {
+  background-color: rgba(255, 255, 255, 0.26);
+}
+
+.open-pods-btn:focus {
+  border-color: rgba(255, 255, 255, 0.4);
+}

@@ -157,6 +157,7 @@ std::optional<int> run_waybar_from_ipc(bool watch) {
         const std::string json = state.waybar_json();
         if (json != last_json) {
             std::cout << json << '\n';
+            std::cout.flush();
             last_json = json;
         }
     };
@@ -360,6 +361,7 @@ int run_waybar_mode(bool watch) {
         const std::string json = direct_waybar_json();
         if (json != last_json) {
             std::cout << json << '\n';
+            std::cout.flush();
             last_json = json;
         }
 

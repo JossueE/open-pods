@@ -34,9 +34,6 @@ void HeadlessState::handle_event(const AppEvent& event) {
 
     auto& state = devices_[aacp->mac];
     state.mac = aacp->mac;
-    if (state.name.empty()) {
-        state.name = "AirPods";
-    }
     selected_mac_ = aacp->mac;
 
     const auto* batteries = std::get_if<std::vector<BatteryInfo>>(&aacp->event);

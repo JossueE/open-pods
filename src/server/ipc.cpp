@@ -185,12 +185,23 @@ std::filesystem::path socket_path() {
                     events_.begin(),
                     events_.end(),
                     [&](const AppEvent& current) {
-                        return same_device(current, connected->mac);
+                        const auto* current_connected =
+                            std::get_if<DeviceConnectedEvent>(&current.payload);
+                        return current_connected != nullptr
+                            && current_connected->mac == connected->mac;
                     }
                 ),
                 events_.end()
             );
-            events_.push_back(event);
+
+            const auto first_device_event = std::find_if(
+                events_.begin(),
+                events_.end(),
+                [&](const AppEvent& current) {
+                    return same_device(current, connected->mac);
+                }
+            );
+            events_.insert(first_device_event, event);
             return;
         }
 
