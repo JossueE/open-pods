@@ -285,6 +285,23 @@ void TuiState::log(std::string message) {
     push_log(log_, std::move(message));
 }
 
+void TuiState::set_selected_section(Section section) {
+    selected_section_ = section;
+    if (section != Section::Settings) {
+        settings_open_ = false;
+    }
+}
+
+void TuiState::open_settings() {
+    selected_section_ = Section::Settings;
+    settings_open_ = true;
+}
+
+void TuiState::close_settings() {
+    selected_section_ = Section::Settings;
+    settings_open_ = false;
+}
+
 void TuiState::log_battery_summary() {
     std::ostringstream line;
     line << "battery:";
@@ -296,6 +313,7 @@ void TuiState::log_battery_summary() {
 }
 
 void TuiState::cycle_section(int delta) {
+    settings_open_ = false;
     const auto count = static_cast<int>(SECTION_COUNT);
     int idx = static_cast<int>(selected_section_) + delta;
     idx = ((idx % count) + count) % count;
@@ -311,6 +329,10 @@ std::size_t TuiState::selected_row(Section section) const {
 }
 
 void TuiState::move_cursor(int delta) {
+    if (selected_section_ == Section::Settings && !settings_open_) {
+        return;
+    }
+
     const auto idx = static_cast<std::size_t>(selected_section_);
     const auto count = static_cast<int>(row_count(selected_section_));
     if (count <= 0) {

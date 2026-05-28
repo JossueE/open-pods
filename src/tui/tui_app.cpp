@@ -388,8 +388,8 @@ bool apply_noise_row(
 }
 
 /**
- * @brief Adjusts the value of the highlighted Settings row. `direction` is
- *        +1 / -1 (LEFT/RIGHT) or 0 (ENTER = toggle / increment).
+ * @brief Adjusts the value of the highlighted Settings row.
+ *        `direction` is +1 / -1 (LEFT/RIGHT).
  */
 bool apply_settings_row(
     ipc::IpcClient& client,
@@ -399,7 +399,14 @@ bool apply_settings_row(
     const auto& dev = state.device();
     const auto row = state.selected_row(Section::Settings);
     auto send_byte = [&](ControlCommandIdentifiers id, uint8_t value) {
-        client.send_command({dev.mac, DeviceCommand::control_command(id, {value})});
+        if (client.send_command({dev.mac, DeviceCommand::control_command(id, {value})})) {
+            // TODO: add a confirmation callback/status path and rollback if the
+            // device reports a different value or never confirms the change.
+            state.handle_event(AppEvent::aacp_event(
+                dev.mac,
+                AACPEvent{ControlCommandStatus{id, {value}}}
+            ));
+        }
     };
 
     auto toggle_bool = [&](ControlCommandIdentifiers id, std::optional<bool> current) {
@@ -593,18 +600,30 @@ int run() {
             const auto& seq = *key;
 
             // Quit
-            if (seq == "q" || seq == "Q" || seq == "\x03" /* Ctrl-C */) {
+            if (seq == "\x03" /* Ctrl-C */) {
                 break;
+            }
+            if (seq == "q" || seq == "Q") {
+                if (state.settings_open()) {
+                    state.close_settings();
+                    dirty = true;
+                } else {
+                    break;
+                }
             }
 
             // Section / row navigation -----------------------------------
-            if (seq == "\t") {
-                state.cycle_section(+1);
-                dirty = true;
+            else if (seq == "\t") {
+                if (!state.settings_open()) {
+                    state.cycle_section(+1);
+                    dirty = true;
+                }
             } else if (seq == "\x1b[Z") {
                 // Shift+Tab → cycle backwards
-                state.cycle_section(-1);
-                dirty = true;
+                if (!state.settings_open()) {
+                    state.cycle_section(-1);
+                    dirty = true;
+                }
             } else if (seq == "\x1b[A") {
                 // ↑
                 state.move_cursor(-1);
@@ -620,7 +639,9 @@ int run() {
                     apply_noise_row(client, state, -1);
                     break;
                 case Section::Settings:
-                    apply_settings_row(client, state, -1);
+                    if (state.settings_open()) {
+                        apply_settings_row(client, state, -1);
+                    }
                     break;
                 case Section::Battery:
                     break; // read-only
@@ -633,18 +654,29 @@ int run() {
                     apply_noise_row(client, state, +1);
                     break;
                 case Section::Settings:
-                    apply_settings_row(client, state, +1);
+                    if (state.settings_open()) {
+                        apply_settings_row(client, state, +1);
+                    }
                     break;
                 case Section::Battery:
                     break;
                 }
                 dirty = true;
-            // Reserved single-letter shortcuts ---------------------------
-            } else if (seq == "r" || seq == "R") {
-                state.log("rename: TODO — implement R when ready");
-                dirty = true;
-            } else if (seq == "i" || seq == "I") {
-                state.log("info: open-pods • Linux AirPods TUI");
+            } else if (seq == "\r" || seq == "\n") {
+                switch (state.selected_section()) {
+                case Section::NoiseControl:
+                    apply_noise_row(client, state, 0);
+                    break;
+                case Section::Battery:
+                    break;
+                case Section::Settings:
+                    if (state.settings_open()) {
+                        state.close_settings();
+                    } else {
+                        state.open_settings();
+                    }
+                    break;
+                }
                 dirty = true;
             } else if (seq == " ") {
                 // Reserved for future media play/pause; today still proxied

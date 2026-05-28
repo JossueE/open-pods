@@ -77,9 +77,6 @@ struct LogEntry {
     std::string message;
 };
 
-/**
- * @brief Sections the user can move between with TAB.
- */
 enum class Section : uint8_t {
     Battery = 0,
     NoiseControl = 1,
@@ -129,7 +126,10 @@ public:
 
     // Section / row navigation -------------------------------------------------
     [[nodiscard]] Section selected_section() const { return selected_section_; }
-    void set_selected_section(Section section) { selected_section_ = section; }
+    [[nodiscard]] bool settings_open() const { return settings_open_; }
+    void set_selected_section(Section section);
+    void open_settings();
+    void close_settings();
     /// Advance the active section by `delta` slots (wraps).
     void cycle_section(int delta);
 
@@ -149,6 +149,7 @@ private:
     bool audio_unavailable_ = false;
     std::deque<LogEntry> log_;
     Section selected_section_ = Section::NoiseControl;
+    bool settings_open_ = false;
     std::array<std::size_t, SECTION_COUNT> selected_rows_ {};
 
     void apply_aacp_event(const AACPEvent& event);

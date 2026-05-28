@@ -1,0 +1,10 @@
+[Unit]
+Description=open-pods daemon
+
+[Service]
+ExecStart=/usr/bin/open-pods --daemon -d
+Restart=on-failure
+RestartSec=2
+
+[Install]
+WantedBy=default.target

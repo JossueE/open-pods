@@ -1,5 +1,17 @@
 .agents/
 .vscode/
 .codex/
-build/
 
+# Build and packaging output
+build/
+_CPack_Packages/
+*.deb
+CPackConfig.cmake
+CPackSourceConfig.cmake
+install_manifest.txt
+
+# CMake generated files, in case someone configures in-tree
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile

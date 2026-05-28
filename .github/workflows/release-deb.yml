@@ -1,0 +1,65 @@
+name: Release Debian package
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-deb:
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential \
+            cmake \
+            pkg-config \
+            libdbus-1-dev \
+            libbluetooth-dev \
+            libpulse-dev \
+            nlohmann-json3-dev
+
+      - name: Configure
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: cmake --build build -j
+
+      - name: Package
+        run: cpack --config build/CPackConfig.cmake
+
+      - name: Prepare release asset
+        id: package
+        run: |
+          package="$(find build -maxdepth 1 -type f -name 'open-pods_*_amd64.deb' ! -name 'open-pods_amd64.deb' -print -quit)"
+          test -n "$package"
+          cp "$package" build/open-pods_amd64.deb
+          echo "path=build/open-pods_amd64.deb" >> "$GITHUB_OUTPUT"
+          echo "name=open-pods_amd64.deb" >> "$GITHUB_OUTPUT"
+
+      - name: Upload workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.package.outputs.name }}
+          path: ${{ steps.package.outputs.path }}
+
+      - name: Create GitHub release and upload package
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag="${GITHUB_REF_NAME}"
+          if ! gh release view "$tag" >/dev/null 2>&1; then
+            gh release create "$tag" --title "$tag" --notes "open-pods $tag"
+          fi
+          gh release upload "$tag" "${{ steps.package.outputs.path }}" --clobber

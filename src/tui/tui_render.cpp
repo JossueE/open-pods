@@ -857,9 +857,29 @@ std::vector<std::string> render_settings(
     return rows;
 }
 
+std::vector<std::string> render_settings_entry(
+    std::size_t inner_width,
+    bool focused
+) {
+    std::vector<std::string> rows;
+    rows.push_back(box_top(inner_width, "", focused));
+
+    const std::string label = focused
+        ? colored(std::string{BOLD} + WHITE, ">> settings")
+        : colored(MUTED, ">> settings");
+    rows.push_back(box_row("  " + label, inner_width, focused));
+
+    rows.push_back(box_bottom(inner_width, focused));
+    return rows;
+}
+
 // ───────────────────── FOOTER / KEYS ─────────────────────
 
-std::vector<std::string> render_footer(std::size_t inner_width) {
+std::vector<std::string> render_footer(
+    std::size_t inner_width,
+    Section active,
+    bool settings_open
+) {
     std::vector<std::string> rows;
     rows.push_back(box_top(inner_width, "KEYS", false));
 
@@ -869,13 +889,23 @@ std::vector<std::string> render_footer(std::size_t inner_width) {
              + colored(MUTED, std::string_view{desc});
     };
 
-    std::string line = "  "
-        + pair("q", "quit") + "    "
-        + pair("tab", "section") + "    "
-        + pair("\xE2\x86\x91\xE2\x86\x93", "navigate") + "    "
-        + pair("\xE2\x86\x90\xE2\x86\x92", "adjust") + "    "
-        + pair("r", "rename") + "    "
-        + pair("i", "info");
+    std::string line = "  " + pair("q", "quit");
+    if (settings_open) {
+        line = "  " + pair("q", "back")
+              + "    " + pair("enter", "back")
+              + "    " + pair("\xE2\x86\x91\xE2\x86\x93", "navigate")
+              + "    " + pair("\xE2\x86\x90\xE2\x86\x92", "adjust");
+    } else {
+        line += "    " + pair("tab", "section")
+              + "    " + pair("\xE2\x86\x91\xE2\x86\x93", "navigate");
+        if (active == Section::NoiseControl) {
+            line += "    " + pair("\xE2\x86\x90\xE2\x86\x92", "adjust")
+                  + "    " + pair("enter", "select");
+        } else if (active == Section::Settings) {
+            line += "    " + pair("enter", "open");
+        }
+    }
+
     rows.push_back(box_row(line, inner_width, false));
     rows.push_back(box_bottom(inner_width, false));
     return rows;
@@ -966,35 +996,43 @@ std::string render_frame(
     const std::size_t total_outer = size.cols;
     const std::size_t total_inner = total_outer >= 2 ? total_outer - 2 : 0;
     const auto active = state.selected_section();
+    const bool settings_open = state.settings_open();
     constexpr std::size_t SIDE_BY_SIDE_MIN_COLS = 80;
     constexpr std::size_t SIDE_BY_SIDE_GAP = 2;
 
-    auto header = render_header(state, total_inner);
-    auto settings = render_settings(state, total_inner, active == Section::Settings);
-    auto footer = render_footer(total_inner);
+    auto footer = render_footer(total_inner, active, settings_open);
 
-    std::vector<std::string> all = std::move(header);
-    if (total_outer >= SIDE_BY_SIDE_MIN_COLS) {
-        const auto panel_width = total_outer - SIDE_BY_SIDE_GAP;
-        const auto battery_outer = panel_width / 2;
-        const auto noise_outer = panel_width - battery_outer;
-        auto battery = render_battery(state, battery_outer - 2, active == Section::Battery);
-        auto noise = render_noise(state, noise_outer - 2, active == Section::NoiseControl);
-        const auto panel_rows = std::max(battery.size(), noise.size());
-        pad_box_to_height(battery, battery_outer - 2, active == Section::Battery, panel_rows);
-        pad_box_to_height(noise, noise_outer - 2, active == Section::NoiseControl, panel_rows);
-        all = stack(std::move(all), side_by_side(
-            battery, battery_outer,
-            noise, noise_outer,
-            SIDE_BY_SIDE_GAP
-        ));
+    std::vector<std::string> all;
+    if (settings_open) {
+        all = render_settings(state, total_inner, true);
     } else {
-        auto battery = render_battery(state, total_inner, active == Section::Battery);
-        auto noise = render_noise(state, total_inner, active == Section::NoiseControl);
-        all = stack(std::move(all), std::move(battery));
-        all = stack(std::move(all), std::move(noise));
+        auto header = render_header(state, total_inner);
+        all = std::move(header);
+        if (total_outer >= SIDE_BY_SIDE_MIN_COLS) {
+            const auto panel_width = total_outer - SIDE_BY_SIDE_GAP;
+            const auto battery_outer = panel_width / 2;
+            const auto noise_outer = panel_width - battery_outer;
+            auto battery = render_battery(state, battery_outer - 2, active == Section::Battery);
+            auto noise = render_noise(state, noise_outer - 2, active == Section::NoiseControl);
+            const auto panel_rows = std::max(battery.size(), noise.size());
+            pad_box_to_height(battery, battery_outer - 2, active == Section::Battery, panel_rows);
+            pad_box_to_height(noise, noise_outer - 2, active == Section::NoiseControl, panel_rows);
+            all = stack(std::move(all), side_by_side(
+                battery, battery_outer,
+                noise, noise_outer,
+                SIDE_BY_SIDE_GAP
+            ));
+        } else {
+            auto battery = render_battery(state, total_inner, active == Section::Battery);
+            auto noise = render_noise(state, total_inner, active == Section::NoiseControl);
+            all = stack(std::move(all), std::move(battery));
+            all = stack(std::move(all), std::move(noise));
+        }
+        all = stack(
+            std::move(all),
+            render_settings_entry(total_inner, active == Section::Settings)
+        );
     }
-    all = stack(std::move(all), std::move(settings));
     all = stack(std::move(all), std::move(footer));
 
     std::ostringstream frame;
