@@ -5,6 +5,10 @@ It talks to Apple's AACP control channel over Bluetooth, keeps that session aliv
 in a small daemon, and exposes battery, noise control, device settings, media
 controls, audio handoff, and Waybar output from the terminal.
 
+<p align="center">
+  <img src="docs/images/open-pods.png" alt="open-pods TUI">
+</p>
+
 ## Features
 
 - **Battery status** for left/right buds, case, and headphone-style models
