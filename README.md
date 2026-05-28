@@ -64,6 +64,11 @@ sudo systemctl restart bluetooth
 systemctl --user daemon-reload
 systemctl --user enable --now open-pods.service
 
+# Enable the GNOME indicator when GNOME Shell is available.
+if command -v gnome-extensions >/dev/null 2>&1; then
+    gnome-extensions enable open-pods@jossuee.dev || true
+fi
+
 # Enable tap gestures (double tap = next, triple tap = previous).
 # AirPods send these as Bluetooth AVRCP commands; mpris-proxy (from bluez)
 # forwards them to your media player.
@@ -74,34 +79,16 @@ systemctl --user enable --now mpris-proxy.service \
        systemctl --user enable --now mpris-proxy.service; }
 ```
 
-## Recommended Ubuntu-GNOME Indicator
-
-The GNOME Shell extension shows AirPods status in the top bar with a Liquid
-Glass styled menu: per-bud battery meters, inline media controls (previous /
-play-pause / next via MPRIS), and a segmented noise-control switch
-(Off / Transparency / Adaptive / ANC). Advanced actions (reclaim audio, open the
-full TUI, battery detail) live in a secondary settings view.
-
-It uses `open-pods --waybar-watch` for live status, `open-pods --set-noise MODE`
-for noise control, `open-pods --reclaim` for reclaiming audio, and opens the full
-TUI with `gnome-terminal -- open-pods`.
-
-Install it manually:
+Recommended Ubuntu-Debian-GNOME widget
 
 ```bash
-cd open-pods/
-mkdir -p ~/.local/share/gnome-shell/extensions
-rm -rf ~/.local/share/gnome-shell/extensions/open-pods@jossuee.dev
-cp -r extensions/gnome/open-pods@jossuee.dev ~/.local/share/gnome-shell/extensions/
 gnome-extensions enable open-pods@jossuee.dev
 ```
 
-If GNOME does not load it immediately, log out and log back in.
-
-
 ## Usage
 
-Use apple Gestures or to open the terminal TUI
+Use Apple gestures, the GNOME indicator in the top-right corner, or open the terminal TUI:
+
 ```bash
 open-pods
 ```
@@ -184,6 +171,31 @@ Push a version tag to build and upload the Debian package automatically:
 git tag v0.1.0
 git push origin v0.1.0
 ```
+
+## Recommended Ubuntu-GNOME Indicator
+
+The GNOME Shell extension shows AirPods status in the top bar with a Liquid
+Glass styled menu: per-bud battery meters, inline media controls (previous /
+play-pause / next via MPRIS), and a segmented noise-control switch
+(Off / Transparency / Adaptive / ANC). Advanced actions (reclaim audio, open the
+full TUI, battery detail) live in a secondary settings view.
+
+It uses `open-pods --waybar-watch` for live status, `open-pods --set-noise MODE`
+for noise control, `open-pods --reclaim` for reclaiming audio, and opens the full
+TUI with `gnome-terminal -- open-pods`.
+
+If you are working from a source checkout, install it manually:
+
+```bash
+cd open-pods/
+mkdir -p ~/.local/share/gnome-shell/extensions
+rm -rf ~/.local/share/gnome-shell/extensions/open-pods@jossuee.dev
+cp -r extensions/gnome/open-pods@jossuee.dev ~/.local/share/gnome-shell/extensions/
+gnome-extensions enable open-pods@jossuee.dev
+```
+
+If GNOME does not list or load it immediately, log out and log back in.
+
 
 ## Usage
 
@@ -281,4 +293,3 @@ Add a custom module to your Waybar config:
 ```
 
 Add `"custom/open-pods"` to your preferred module list and restart Waybar.
-

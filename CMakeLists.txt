@@ -46,6 +46,10 @@ install(FILES packaging/open-pods.service
     DESTINATION lib/systemd/user
 )
 
+install(DIRECTORY extensions/gnome/open-pods@jossuee.dev
+    DESTINATION share/gnome-shell/extensions
+)
+
 set(CPACK_GENERATOR "DEB")
 set(CPACK_PACKAGE_NAME "open-pods")
 set(CPACK_PACKAGE_VENDOR "JossueE")
