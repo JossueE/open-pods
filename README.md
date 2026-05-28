@@ -64,6 +64,24 @@ sudo systemctl restart bluetooth
 systemctl --user daemon-reload
 systemctl --user enable --now open-pods.service
 ```
+## Recommended Ubuntu-GNOME Indicator
+
+The GNOME Shell extension shows AirPods battery status in the top bar. It uses
+`open-pods --waybar-watch` for live status, `open-pods --reclaim` for reclaiming
+audio, and opens the full TUI with `gnome-terminal -- open-pods`.
+
+Install it manually:
+
+```bash
+mkdir -p ~/.local/share/gnome-shell/extensions
+rm -rf ~/.local/share/gnome-shell/extensions/open-pods@jossuee.dev
+cp -r extensions/gnome/open-pods@jossuee.dev ~/.local/share/gnome-shell/extensions/
+gnome-extensions enable open-pods@jossuee.dev
+```
+
+If GNOME does not load it immediately, log out and log back in.
+
+
 ## Usage
 
 Use apple Gestures or to open the terminal TUI
@@ -238,19 +256,3 @@ Add a custom module to your Waybar config:
 
 Add `"custom/open-pods"` to your preferred module list and restart Waybar.
 
-## Optional GNOME Indicator
-
-The GNOME Shell extension shows AirPods battery status in the top bar. It uses
-`open-pods --waybar-watch` for live status, `open-pods --reclaim` for reclaiming
-audio, and opens the full TUI with `gnome-terminal -- open-pods`.
-
-Install it manually:
-
-```bash
-mkdir -p ~/.local/share/gnome-shell/extensions
-rm -rf ~/.local/share/gnome-shell/extensions/open-pods@jossuee.dev
-cp -r extensions/gnome/open-pods@jossuee.dev ~/.local/share/gnome-shell/extensions/
-gnome-extensions enable open-pods@jossuee.dev
-```
-
-If GNOME does not load it immediately, log out and log back in.
