@@ -63,12 +63,28 @@ sudo systemctl restart bluetooth
 # Activate Open-pods
 systemctl --user daemon-reload
 systemctl --user enable --now open-pods.service
+
+# Enable tap gestures (double tap = next, triple tap = previous).
+# AirPods send these as Bluetooth AVRCP commands; mpris-proxy (from bluez)
+# forwards them to your media player.
+systemctl --user enable --now mpris-proxy.service \
+  || { mkdir -p ~/.config/systemd/user
+       printf '[Unit]\nDescription=Forward bluetooth AVRCP controls to MPRIS players\nAfter=bluetooth.target sound.target\n\n[Service]\nExecStart=/usr/bin/mpris-proxy\nRestart=on-failure\nRestartSec=2\n\n[Install]\nWantedBy=default.target\n' > ~/.config/systemd/user/mpris-proxy.service
+       systemctl --user daemon-reload
+       systemctl --user enable --now mpris-proxy.service; }
 ```
+
 ## Recommended Ubuntu-GNOME Indicator
 
-The GNOME Shell extension shows AirPods battery status in the top bar. It uses
-`open-pods --waybar-watch` for live status, `open-pods --reclaim` for reclaiming
-audio, and opens the full TUI with `gnome-terminal -- open-pods`.
+The GNOME Shell extension shows AirPods status in the top bar with a Liquid
+Glass styled menu: per-bud battery meters, inline media controls (previous /
+play-pause / next via MPRIS), and a segmented noise-control switch
+(Off / Transparency / Adaptive / ANC). Advanced actions (reclaim audio, open the
+full TUI, battery detail) live in a secondary settings view.
+
+It uses `open-pods --waybar-watch` for live status, `open-pods --set-noise MODE`
+for noise control, `open-pods --reclaim` for reclaiming audio, and opens the full
+TUI with `gnome-terminal -- open-pods`.
 
 Install it manually:
 
@@ -175,6 +191,14 @@ The package installs a user daemon. Enable it once:
 ```bash
 systemctl --user daemon-reload
 systemctl --user enable --now open-pods.service
+
+# Tap gestures (double = next, triple = previous) ride on Bluetooth AVRCP;
+# mpris-proxy (from bluez) forwards them to your media player.
+systemctl --user enable --now mpris-proxy.service \
+  || { mkdir -p ~/.config/systemd/user
+       printf '[Unit]\nDescription=Forward bluetooth AVRCP controls to MPRIS players\nAfter=bluetooth.target sound.target\n\n[Service]\nExecStart=/usr/bin/mpris-proxy\nRestart=on-failure\nRestartSec=2\n\n[Install]\nWantedBy=default.target\n' > ~/.config/systemd/user/mpris-proxy.service
+       systemctl --user daemon-reload
+       systemctl --user enable --now mpris-proxy.service; }
 ```
 
 Then open the TUI:
@@ -198,6 +222,7 @@ Available commands:
 open-pods                 # launch TUI
 open-pods --daemon        # run the headless daemon
 open-pods --reclaim       # force AirPods audio back to this Linux host
+open-pods --set-noise MODE # set noise control: off|anc|transparency|adaptive
 open-pods -d, --debug     # enable debug logging
 open-pods -v, --version   # show version and exit
 open-pods -h, --help      # show help

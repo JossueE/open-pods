@@ -1,0 +1,7 @@
+{
+  "uuid": "open-pods@jossuee.dev",
+  "name": "open-pods",
+  "description": "AirPods battery indicator for open-pods",
+  "shell-version": ["45", "46", "47", "48"],
+  "version": 1
+}

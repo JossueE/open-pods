@@ -28,6 +28,7 @@ private:
         std::optional<BatteryValue> right;
         std::optional<BatteryValue> case_battery;
         std::optional<BatteryValue> headphone;
+        std::optional<uint8_t> noise_mode;
     };
 
     static std::string display_name(const DeviceState& device);

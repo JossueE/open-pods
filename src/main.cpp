@@ -292,12 +292,60 @@ int run_reclaim() {
     return 0;
 }
 
+std::optional<uint8_t> noise_byte_from_name(std::string_view mode) {
+    if (mode == "off") return 0x01;
+    if (mode == "anc" || mode == "noise-cancellation" || mode == "nc") return 0x02;
+    if (mode == "transparency" || mode == "trans") return 0x03;
+    if (mode == "adaptive") return 0x04;
+    return std::nullopt;
+}
+
+int run_set_noise(const std::string& mode) {
+    const auto byte = noise_byte_from_name(mode);
+    if (!byte) {
+        std::cerr << "Invalid noise mode '" << mode
+                  << "'. Use off|anc|transparency|adaptive.\n";
+        return 2;
+    }
+
+    ipc::IpcClient client{
+        serialize_device_command_envelope,
+        deserialize_app_event
+    };
+
+    if (!client.connect()) {
+        std::cerr << "Could not reach the open-pods daemon. Is it running?\n";
+        return 1;
+    }
+
+    BluezDiscoveryBackend backend;
+    const auto target = find_connected_airpods(backend);
+    if (!target) {
+        std::cerr << "No connected AirPods found.\n";
+        return 1;
+    }
+
+    const bool sent = client.send_command(std::make_pair(
+        target->address,
+        DeviceCommand::control_command(
+            ControlCommandIdentifiers::ListeningMode,
+            {*byte}
+        )
+    ));
+    if (!sent) {
+        std::cerr << "Failed to send noise-control command to the daemon.\n";
+        return 1;
+    }
+    return 0;
+}
+
 } // namespace
 
 MainArgs parse_args(const std::vector<std::string_view>& args) {
     MainArgs parsed;
 
-    for (std::string_view arg : args) {
+    for (std::size_t i = 0; i < args.size(); ++i) {
+        const std::string_view arg = args[i];
         if (arg == "--debug" || arg == "-d") {
             parsed.debug = true;
         } else if (arg == "--version" || arg == "-v") {
@@ -310,6 +358,14 @@ MainArgs parse_args(const std::vector<std::string_view>& args) {
             parsed.daemon = true;
         } else if (arg == "--reclaim") {
             parsed.reclaim = true;
+        } else if (arg.rfind("--set-noise=", 0) == 0) {
+            parsed.set_noise = std::string{arg.substr(std::string_view{"--set-noise="}.size())};
+        } else if (arg == "--set-noise") {
+            if (i + 1 >= args.size()) {
+                std::cerr << "--set-noise requires a mode: off|anc|transparency|adaptive\n";
+                std::exit(2);
+            }
+            parsed.set_noise = std::string{args[++i]};
         } else if (arg == "--help" || arg == "-h") {
             print_usage("open-pods");
             std::exit(0);
@@ -333,6 +389,7 @@ void print_usage(std::string_view program_name) {
         << "      --waybar-watch   Print JSON status for waybar on each change\n"
         << "      --daemon         Run headless daemon\n"
         << "      --reclaim        Force the AirPods back to this host (when an iPhone took the audio source)\n"
+        << "      --set-noise MODE Set noise control mode: off|anc|transparency|adaptive\n"
         << "  -h, --help           Show this help\n";
 }
 
@@ -462,6 +519,10 @@ int main(int argc, char** argv) {
 
     if (parsed.reclaim) {
         return run_reclaim();
+    }
+
+    if (!parsed.set_noise.empty()) {
+        return run_set_noise(parsed.set_noise);
     }
 
     if (parsed.waybar || parsed.waybar_watch) {

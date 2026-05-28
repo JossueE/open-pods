@@ -1,5 +1,6 @@
 #pragma once
 
+#include <string>
 #include <string_view>
 #include <vector>
 
@@ -10,6 +11,7 @@ struct MainArgs {
     bool waybar_watch = false;
     bool daemon = false;
     bool reclaim = false;
+    std::string set_noise;
 };
 
 MainArgs parse_args(const std::vector<std::string_view>& args);

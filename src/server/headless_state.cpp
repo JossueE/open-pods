@@ -36,6 +36,14 @@ void HeadlessState::handle_event(const AppEvent& event) {
     state.mac = aacp->mac;
     selected_mac_ = aacp->mac;
 
+    if (const auto* control = std::get_if<ControlCommandStatus>(&aacp->event)) {
+        if (control->identifier == ControlCommandIdentifiers::ListeningMode
+            && !control->value.empty()) {
+            state.noise_mode = control->value.front();
+        }
+        return;
+    }
+
     const auto* batteries = std::get_if<std::vector<BatteryInfo>>(&aacp->event);
     if (batteries == nullptr) {
         return;
@@ -82,21 +90,34 @@ std::string HeadlessState::waybar_json() const {
     int percentage = 0;
     std::string text = name;
 
+    auto batteries = nlohmann::json::array();
+    auto push_battery = [&](const char* component, const BatteryValue& value) {
+        batteries.push_back({
+            {"component", component},
+            {"level", value.level},
+            {"charging", value.status == BatteryStatus::Charging},
+        });
+    };
+
     std::vector<uint8_t> levels;
     if (device.left) {
         levels.push_back(device.left->level);
         tooltip += "\nL: " + std::to_string(device.left->level) + "%";
+        push_battery("left", *device.left);
     }
     if (device.right) {
         levels.push_back(device.right->level);
         tooltip += "\nR: " + std::to_string(device.right->level) + "%";
+        push_battery("right", *device.right);
     }
     if (device.case_battery) {
         tooltip += "\nC: " + std::to_string(device.case_battery->level) + "%";
+        push_battery("case", *device.case_battery);
     }
     if (device.headphone) {
         levels.push_back(device.headphone->level);
         tooltip += "\n" + std::to_string(device.headphone->level) + "%";
+        push_battery("headphone", *device.headphone);
     }
 
     if (!levels.empty()) {
@@ -104,11 +125,32 @@ std::string HeadlessState::waybar_json() const {
         text = std::to_string(percentage) + "%";
     }
 
+    const char* noise = "";
+    if (device.noise_mode) {
+        switch (*device.noise_mode) {
+            case 0x01: noise = "off"; break;
+            case 0x02: noise = "anc"; break;
+            case 0x03: noise = "transparency"; break;
+            case 0x04: noise = "adaptive"; break;
+            default: noise = ""; break;
+        }
+    }
+
+    AppleModels models;
+    const auto info = models.model_info(device.product_id);
+
     return nlohmann::json{
         {"text", text},
         {"tooltip", tooltip},
         {"class", "connected"},
-        {"percentage", percentage}
+        {"percentage", percentage},
+        {"name", name},
+        {"noise", noise},
+        {"caps", {
+            {"anc", info.has_noise_cancellation},
+            {"adaptive", info.has_adaptive_transparency},
+        }},
+        {"batteries", batteries}
     }.dump();
 }
 

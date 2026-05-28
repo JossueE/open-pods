@@ -591,7 +591,7 @@ class OpenPodsIndicator extends PanelMenu.Button {
                 spawn(['open-pods', '--reclaim']);
             }));
         actions.add_child(this._makeRowButton('utilities-terminal-symbolic', 'Open full app',
-            'Configure in the terminal UI', () => {
+            'Launch the open-pods terminal UI', () => {
                 this.menu.close();
                 openTui();
             }));
