@@ -89,6 +89,7 @@ TUI with `gnome-terminal -- open-pods`.
 Install it manually:
 
 ```bash
+cd open-pods/
 mkdir -p ~/.local/share/gnome-shell/extensions
 rm -rf ~/.local/share/gnome-shell/extensions/open-pods@jossuee.dev
 cp -r extensions/gnome/open-pods@jossuee.dev ~/.local/share/gnome-shell/extensions/
