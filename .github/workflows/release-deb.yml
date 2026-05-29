@@ -53,6 +53,10 @@ jobs:
           echo "path=build/open-pods_amd64.deb" >> "$GITHUB_OUTPUT"
           echo "name=open-pods_amd64.deb" >> "$GITHUB_OUTPUT"
 
+      - name: Verify GNOME extension is packaged
+        run: |
+          dpkg-deb -c build/open-pods_amd64.deb | grep -F "./usr/share/gnome-shell/extensions/open-pods@jossuee.dev/extension.js"
+
       - name: Upload workflow artifact
         uses: actions/upload-artifact@v4
         with:
