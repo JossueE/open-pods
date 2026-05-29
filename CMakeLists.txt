@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(open_pods VERSION 0.1.0 LANGUAGES CXX)
+set(OPEN_PODS_VERSION "0.0.0" CACHE STRING "Project version")
+project(open_pods VERSION ${OPEN_PODS_VERSION} LANGUAGES CXX)
 
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(DBUS REQUIRED dbus-1)
