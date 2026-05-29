@@ -87,7 +87,10 @@ systemctl --user enable --now mpris-proxy.service \
        systemctl --user enable --now mpris-proxy.service; }
 ```
 
-Recommended Ubuntu-Debian-GNOME widget
+Recommended Ubuntu-Debian-GNOME widget:
+
+> [!NOTE]
+> If you see a message saying the extension does not exist, press Alt + F2, type `r`, and press Enter, or restart your computer.
 
 ```bash
 gnome-extensions enable open-pods@jossuee.dev
