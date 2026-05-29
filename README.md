@@ -1,13 +1,21 @@
 # open-pods
 
-A terminal UI for managing AirPods and compatible Apple/Beats headphones on Linux.
-It talks to Apple's AACP control channel over Bluetooth, keeps that session alive
-in a small daemon, and exposes battery, noise control, device settings, media
-controls, audio handoff, and Waybar output from the terminal.
+Native Linux integration for AirPods and compatible Apple/Beats headphones.
+OpenPods talks to Apple's AACP control channel over Bluetooth, keeps that
+session alive in a small daemon, and exposes battery, noise control, device
+settings, media controls, audio handoff, GNOME indicator support, Waybar output,
+and a terminal TUI.
 
 <p align="center">
-  <img src="docs/images/open-pods.png" alt="open-pods TUI">
+  <img src="docs/images/open-pods2.png" alt="OpenPods hero">
 </p>
+
+<table>
+  <tr>
+    <td><img src="docs/images/open-pods3.png" alt="OpenPods desktop preview"></td>
+    <td><img src="docs/images/open-pods1.png" alt="OpenPods native preview"></td>
+  </tr>
+</table>
 
 ## Features
 
